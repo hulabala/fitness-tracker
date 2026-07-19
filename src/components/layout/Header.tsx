@@ -12,10 +12,10 @@ import { Barbell, ChartBar, ClockCounterClockwise, Calendar, Sun, Moon, Plus, Do
  }
  
  const tabs: { id: Tab; label: string; icon: typeof Barbell }[] = [
+   { id: 'monthly', label: '月总结', icon: Calendar },
    { id: 'dashboard', label: '看板', icon: ChartBar },
    { id: 'workout', label: '训练记录', icon: Barbell },
    { id: 'history', label: '历史', icon: ClockCounterClockwise },
-  { id: 'monthly', label: '月总结', icon: Calendar },
  ];
  
  function DataMenu() {

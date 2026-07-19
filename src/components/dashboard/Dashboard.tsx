@@ -18,7 +18,7 @@ const widgetSize: Record<string, { cols: number; height: number; label: string }
 };
 
 export default function Dashboard() {
-  const { workouts, dashboardWidgets, addDashboardWidget, removeDashboardWidget, updateWidgetVisualization } =
+  const { workouts, dashboardWidgets, addDashboardWidget, removeDashboardWidget, updateWidgetVisualization, updateWidgetType } =
     useFitnessStore();
   const [showAddMenu, setShowAddMenu] = useState(false);
 
@@ -141,11 +141,13 @@ function WidgetCard({
   widget,
   size,
   onRemove,
+  onTypeChange,
   onVizChange,
 }: {
   widget: DashboardWidget;
-  size: { cols: number; height: number };
+  size: { height: number };
   onRemove: () => void;
+  onTypeChange: (type: WidgetType) => void;
   onVizChange: (viz: DashboardWidget['visualization']) => void;
 }) {
   const [showVizMenu, setShowVizMenu] = useState(false);
@@ -160,9 +162,15 @@ function WidgetCard({
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden shadow-sm transition-shadow hover:shadow-md">
       {/* Widget header */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-zinc-100 dark:border-zinc-800">
-        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-          {widgetTypeLabels[widget.type] || widget.title}
-        </span>
+        <select
+          value={widget.type}
+          onChange={(e) => onTypeChange(e.target.value as WidgetType)}
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-transparent border-0 cursor-pointer focus:outline-none focus:ring-0 appearance-none pr-4"
+        >
+          {availableTypes.map((t) => (
+            <option key={t} value={t}>{widgetTypeLabels[t] || t}</option>
+          ))}
+        </select>
         <div className="flex items-center gap-0.5">
           {/* Visualization selector */}
           <div className="relative">

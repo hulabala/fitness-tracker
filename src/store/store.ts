@@ -34,6 +34,7 @@ interface FitnessState {
   addDashboardWidget: (type: DashboardWidget['type']) => void;
   removeDashboardWidget: (widgetId: string) => void;
   updateWidgetVisualization: (widgetId: string, visualization: DashboardWidget['visualization']) => void;
+  updateWidgetType: (widgetId: string, type: DashboardWidget['type']) => void;
   changeWidgetType: (widgetId: string, newType: DashboardWidget['type']) => void;
   addCustomExercise: (exercise: ExerciseDefinition) => void;
 }
@@ -247,6 +248,10 @@ export const useFitnessStore = create<FitnessState>()(
       updateWidgetVisualization: (widgetId, visualization) => {
         const { dashboardWidgets } = get();
         set({ dashboardWidgets: dashboardWidgets.map((w) => (w.id === widgetId ? { ...w, visualization } : w)) });
+      },
+      updateWidgetType: (widgetId, type) => {
+        const { dashboardWidgets } = get();
+        set({ dashboardWidgets: dashboardWidgets.map((w) => (w.id === widgetId ? { ...w, type } : w)) });
       },
 
       changeWidgetType: (widgetId, newType) => {
