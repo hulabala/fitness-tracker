@@ -34,6 +34,7 @@ interface FitnessState {
   addDashboardWidget: (type: DashboardWidget['type']) => void;
   removeDashboardWidget: (widgetId: string) => void;
   updateWidgetVisualization: (widgetId: string, visualization: DashboardWidget['visualization']) => void;
+  changeWidgetType: (widgetId: string, newType: DashboardWidget['type']) => void;
   addCustomExercise: (exercise: ExerciseDefinition) => void;
 }
 
@@ -54,8 +55,6 @@ function createDefaultWidgets(): DashboardWidget[] {
     { id: uuidv4(), type: 'weeklySummary', visualization: 'card', title: '本周概览' },
     { id: uuidv4(), type: 'weeklyVolume', visualization: 'bar', title: '每周容量' },
     { id: uuidv4(), type: 'muscleVolume', visualization: 'bar', title: '部位容量' },
-    { id: uuidv4(), type: 'progressiveOverload', visualization: 'table', title: '渐进超负荷' },
-    { id: uuidv4(), type: 'muscleProgress', visualization: 'table', title: '部位渐进超负荷' },
   ];
 }
 export const useFitnessStore = create<FitnessState>()(
@@ -248,6 +247,11 @@ export const useFitnessStore = create<FitnessState>()(
       updateWidgetVisualization: (widgetId, visualization) => {
         const { dashboardWidgets } = get();
         set({ dashboardWidgets: dashboardWidgets.map((w) => (w.id === widgetId ? { ...w, visualization } : w)) });
+      },
+
+      changeWidgetType: (widgetId, newType) => {
+        const { dashboardWidgets } = get();
+        set({ dashboardWidgets: dashboardWidgets.map((w) => (w.id === widgetId ? { ...w, type: newType } : w)) });
       },
 
       addCustomExercise: (exercise) => {

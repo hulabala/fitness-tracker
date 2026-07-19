@@ -8,16 +8,13 @@ const widgetTypeLabels: Record<WidgetType, string> = {
   weeklySummary: '本周概览',
   weeklyVolume: '每周容量',
   muscleVolume: '部位容量',
-  progressiveOverload: '渐进超负荷',
-  muscleProgress: '部位渐进超负荷',
+  monthlyStats: '月度统计',
 };
 
 const widgetSize: Record<string, { cols: number; height: number; label: string }> = {
-  weeklySummary: { cols: 1, height: 150, label: '小' },
-  weeklyVolume: { cols: 1, height: 220, label: '中' },
-  muscleVolume: { cols: 1, height: 220, label: '中' },
-  progressiveOverload: { cols: 2, height: 260, label: '大' },
-  muscleProgress: { cols: 1, height: 220, label: '中' },
+  weeklySummary: { cols: 1, height: 180, label: '小' },
+  weeklyVolume: { cols: 1, height: 300, label: '大' },
+  muscleVolume: { cols: 1, height: 300, label: '大' },
 };
 
 export default function Dashboard() {
@@ -29,8 +26,6 @@ export default function Dashboard() {
     'weeklySummary',
     'weeklyVolume',
     'muscleVolume',
-    'progressiveOverload',
-    'muscleProgress',
   ];
 
   // Guard: if no widgets, show empty state
@@ -64,12 +59,10 @@ export default function Dashboard() {
   const summaryW = dashboardWidgets.find((w) => w.type === 'weeklySummary');
   const volumeW = dashboardWidgets.find((w) => w.type === 'weeklyVolume');
   const muscleW = dashboardWidgets.find((w) => w.type === 'muscleVolume');
-  const progressW = dashboardWidgets.find((w) => w.type === 'progressiveOverload');
-  const muscleProgressW = dashboardWidgets.find((w) => w.type === 'muscleProgress');
 
   // Other widgets (custom / extra)
   const otherWidgets = dashboardWidgets.filter(
-    (w) => !['weeklySummary', 'weeklyVolume', 'muscleVolume', 'progressiveOverload', 'muscleProgress'].includes(w.type)
+    (w) => !['weeklySummary', 'weeklyVolume', 'muscleVolume'].includes(w.type)
   );
 
   return (
@@ -128,13 +121,7 @@ export default function Dashboard() {
           {muscleW && <WidgetCard widget={muscleW} size={widgetSize[muscleW.type]} onRemove={() => removeDashboardWidget(muscleW.id)} onVizChange={(v) => updateWidgetVisualization(muscleW.id, v)} />}
         </div>
 
-        {/* Row 2: progressive overload (large, 2 cols) + muscle progress (medium) */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <div className="md:col-span-2">
-            {progressW && <WidgetCard widget={progressW} size={widgetSize[progressW.type]} onRemove={() => removeDashboardWidget(progressW.id)} onVizChange={(v) => updateWidgetVisualization(progressW.id, v)} />}
-          </div>
-          {muscleProgressW && <WidgetCard widget={muscleProgressW} size={widgetSize[muscleProgressW.type]} onRemove={() => removeDashboardWidget(muscleProgressW.id)} onVizChange={(v) => updateWidgetVisualization(muscleProgressW.id, v)} />}
-        </div>
+
 
         {/* Extra widgets */}
         {otherWidgets.length > 0 && (
@@ -162,10 +149,12 @@ function WidgetCard({
   onVizChange: (viz: DashboardWidget['visualization']) => void;
 }) {
   const [showVizMenu, setShowVizMenu] = useState(false);
+  const [showTypeMenu, setShowTypeMenu] = useState(false);
   const workouts = useFitnessStore((s) => s.workouts);
 
   const currentViz = vizOptions.find((v) => v.value === widget.visualization);
   const VizIcon = currentViz?.icon || ChartBar;
+  const onChangeType = useFitnessStore((s) => s.changeWidgetType);
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden shadow-sm transition-shadow hover:shadow-md">
