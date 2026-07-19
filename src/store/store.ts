@@ -54,7 +54,7 @@ function createDefaultWidgets(): DashboardWidget[] {
     { id: uuidv4(), type: 'weeklySummary', visualization: 'card', title: '本周概览' },
     { id: uuidv4(), type: 'weeklyVolume', visualization: 'bar', title: '每周容量' },
     { id: uuidv4(), type: 'muscleVolume', visualization: 'bar', title: '部位容量' },
-    { id: uuidv4(), type: 'progressiveOverload', visualization: 'line', title: '渐进超负荷' },
+    { id: uuidv4(), type: 'progressiveOverload', visualization: 'table', title: '渐进超负荷' },
   ];
 }
 
@@ -265,8 +265,8 @@ export const useFitnessStore = create<FitnessState>()(
     }),
     migrate: (persistedState: any, version: number) => {
       let state = { ...persistedState };
-      // Migration from no version / v0 to v1
-      if (version === 0) {
+      // Migration from no version / v0 to v1 (version is 0 when unversioned)
+      if (!version || version < 1) {
         // Remove widgetLayouts if present (removed from interface)
         delete state.widgetLayouts;
         // Migrate isProgressiveOverload from set-level to exercise-level

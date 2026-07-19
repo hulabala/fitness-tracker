@@ -74,6 +74,7 @@
              name={s.name}
              stroke={s.color}
              strokeWidth={2}
+             connectNulls={true}
              dot={{ r: 3, strokeWidth: 1 }}
              activeDot={{ r: 4, strokeWidth: 1 }}
            />

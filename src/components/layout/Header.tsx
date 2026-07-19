@@ -1,4 +1,5 @@
- import { Barbell, ChartBar, ClockCounterClockwise, Calendar, Sun, Moon, Plus } from '@phosphor-icons/react';
+ import { useState, useRef } from 'react';
+import { Barbell, ChartBar, ClockCounterClockwise, Calendar, Sun, Moon, Plus, DownloadSimple, UploadSimple } from '@phosphor-icons/react';
  
  type Tab = 'dashboard' | 'workout' | 'history' | 'monthly';
  
@@ -17,7 +18,83 @@
   { id: 'monthly', label: '月总结', icon: Calendar },
  ];
  
- export default function Header({
+ function DataMenu() {
+  const [open, setOpen] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    const raw = localStorage.getItem('fitness-dashboard-storage');
+    if (!raw) { alert('没有数据可导出'); return; }
+    const blob = new Blob([raw], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `fitness-data-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setOpen(false);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const text = ev.target?.result as string;
+        const data = JSON.parse(text);
+        if (!data.state || !data.state.workouts) {
+          alert('无效的数据文件');
+          return;
+        }
+        localStorage.setItem('fitness-dashboard-storage', text);
+        alert('导入成功！页面即将刷新');
+        window.location.reload();
+      } catch {
+        alert('文件解析失败，请确认是导出的 JSON 文件');
+      }
+    };
+    reader.readAsText(file);
+    setOpen(false);
+    e.target.value = '';
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="p-2 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-xs"
+        title="导出/导入数据"
+      >
+        <DownloadSimple size={16} />
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-zinc-900 rounded-xl shadow-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden min-w-[140px]">
+            <button
+              onClick={handleExport}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <DownloadSimple size={16} />
+              导出数据
+            </button>
+            <button
+              onClick={() => { fileRef.current?.click(); setOpen(false); }}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            >
+              <UploadSimple size={16} />
+              导入数据
+            </button>
+          </div>
+          <input ref={fileRef} type="file" accept=".json" onChange={handleImport} className="hidden" />
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Header({
    activeTab,
    onTabChange,
    darkMode,
