@@ -12,6 +12,14 @@ const widgetTypeLabels: Record<WidgetType, string> = {
   muscleProgress: '部位渐进超负荷',
 };
 
+const widgetSize: Record<string, { cols: number; height: number; label: string }> = {
+  weeklySummary: { cols: 1, height: 150, label: '小' },
+  weeklyVolume: { cols: 1, height: 220, label: '中' },
+  muscleVolume: { cols: 1, height: 220, label: '中' },
+  progressiveOverload: { cols: 2, height: 260, label: '大' },
+  muscleProgress: { cols: 1, height: 220, label: '中' },
+};
+
 export default function Dashboard() {
   const { workouts, dashboardWidgets, addDashboardWidget, removeDashboardWidget, updateWidgetVisualization } =
     useFitnessStore();
@@ -115,19 +123,17 @@ export default function Dashboard() {
       <div className="space-y-5">
         {/* Row 1: summary, volume, muscle */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {summaryW && <WidgetCard widget={summaryW} onRemove={() => removeDashboardWidget(summaryW.id)} onVizChange={(v) => updateWidgetVisualization(summaryW.id, v)} />}
-          {volumeW && <WidgetCard widget={volumeW} onRemove={() => removeDashboardWidget(volumeW.id)} onVizChange={(v) => updateWidgetVisualization(volumeW.id, v)} />}
-          {muscleW && <WidgetCard widget={muscleW} onRemove={() => removeDashboardWidget(muscleW.id)} onVizChange={(v) => updateWidgetVisualization(muscleW.id, v)} />}
+          {summaryW && <WidgetCard widget={summaryW} size={widgetSize[summaryW.type]} onRemove={() => removeDashboardWidget(summaryW.id)} onVizChange={(v) => updateWidgetVisualization(summaryW.id, v)} />}
+          {volumeW && <WidgetCard widget={volumeW} size={widgetSize[volumeW.type]} onRemove={() => removeDashboardWidget(volumeW.id)} onVizChange={(v) => updateWidgetVisualization(volumeW.id, v)} />}
+          {muscleW && <WidgetCard widget={muscleW} size={widgetSize[muscleW.type]} onRemove={() => removeDashboardWidget(muscleW.id)} onVizChange={(v) => updateWidgetVisualization(muscleW.id, v)} />}
         </div>
 
-        {/* Row 2: progressive overload + muscle progress */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {progressW && (
-            <WidgetCard widget={progressW} onRemove={() => removeDashboardWidget(progressW.id)} onVizChange={(v) => updateWidgetVisualization(progressW.id, v)} />
-          )}
-          {muscleProgressW && (
-            <WidgetCard widget={muscleProgressW} onRemove={() => removeDashboardWidget(muscleProgressW.id)} onVizChange={(v) => updateWidgetVisualization(muscleProgressW.id, v)} />
-          )}
+        {/* Row 2: progressive overload (large, 2 cols) + muscle progress (medium) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="md:col-span-2">
+            {progressW && <WidgetCard widget={progressW} size={widgetSize[progressW.type]} onRemove={() => removeDashboardWidget(progressW.id)} onVizChange={(v) => updateWidgetVisualization(progressW.id, v)} />}
+          </div>
+          {muscleProgressW && <WidgetCard widget={muscleProgressW} size={widgetSize[muscleProgressW.type]} onRemove={() => removeDashboardWidget(muscleProgressW.id)} onVizChange={(v) => updateWidgetVisualization(muscleProgressW.id, v)} />}
         </div>
 
         {/* Extra widgets */}
@@ -146,10 +152,12 @@ export default function Dashboard() {
 // Individual widget card
 function WidgetCard({
   widget,
+  size,
   onRemove,
   onVizChange,
 }: {
   widget: DashboardWidget;
+  size: { cols: number; height: number };
   onRemove: () => void;
   onVizChange: (viz: DashboardWidget['visualization']) => void;
 }) {
@@ -220,7 +228,7 @@ function WidgetCard({
       </div>
 
       {/* Widget content */}
-      <div className="h-[200px]">
+      <div style={{ height: size.height }}>
         <WidgetRenderer widget={widget} workouts={workouts} />
       </div>
     </div>
