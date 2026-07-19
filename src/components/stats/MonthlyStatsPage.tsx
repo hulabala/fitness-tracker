@@ -2,13 +2,11 @@ import { useState, useMemo } from 'react';
 import { useFitnessStore } from '../../store/store';
 import { Workout } from '../../types';
 import { getExercise } from '../../data/exercises';
-import { getMuscleTarget } from '../../data/muscleTargets';
 import {
   getWorkoutsInMonth,
   workoutVolume,
   totalSets,
   totalReps,
-  aggregateMuscleVolume,
   getProgressiveOverloadSets,
   getExercise1RMProgression,
   get1RMProgression,
@@ -17,12 +15,6 @@ import {
 import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 import { addMonths, subMonths, format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-
-function fatigueColor(sets: number, maxSets: number): string {
-  const ratio = Math.min(sets / maxSets, 1);
-  const hue = Math.round(210 - ratio * 210);
-  return `hsl(${hue}, 75%, 48%)`;
-}
 
 export default function MonthlyStatsPage() {
   const { workouts } = useFitnessStore();
@@ -40,10 +32,7 @@ export default function MonthlyStatsPage() {
     totalReps: monthWorkouts.reduce((s, w) => s + totalReps(w), 0),
   }), [monthWorkouts]);
 
-  const muscleData = useMemo(
-    () => aggregateMuscleVolume(monthWorkouts),
-    [monthWorkouts]
-  );
+
 
   const e1rmData = useMemo(
     () => getExercise1RMProgression(workouts, currentMonth),
@@ -82,7 +71,7 @@ export default function MonthlyStatsPage() {
     return Array.from(months).sort();
   }, [oneRMData]);
 
-  const maxMuscleSets = Math.max(...muscleData.map((m) => m.sets), 1);
+
   const monthLabel = format(currentMonth, 'yyyy年M月', { locale: zhCN });
 
   return (
@@ -157,36 +146,6 @@ export default function MonthlyStatsPage() {
       </div>
 
       {/* Muscle volume by month */}
-      {muscleData.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium mb-3 text-zinc-700 dark:text-zinc-300">部位容量（疲劳监测）</h3>
-          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-zinc-200 dark:border-zinc-700">
-                  <th className="text-left px-4 py-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">部位</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">组数</th>
-                  <th className="text-right px-4 py-3 text-xs font-medium text-zinc-500 dark:text-zinc-400">容量</th>
-                </tr>
-              </thead>
-              <tbody>
-                {muscleData.sort((a, b) => b.sets - a.sets).map((m) => (
-                  <tr
-                    key={m.muscleId}
-                    className="border-b border-zinc-100 dark:border-zinc-800 last:border-0"
-                    style={{ backgroundColor: `${fatigueColor(m.sets, maxMuscleSets)}15` }}
-                  >
-                    <td className="px-4 py-2.5 font-medium">{m.muscleName}</td>
-                    <td className="px-4 py-2.5 text-right font-mono">{m.sets} 组</td>
-                    <td className="px-4 py-2.5 text-right font-mono text-zinc-500 dark:text-zinc-400">{m.volume.toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
       {/* Progressive overload progress */}
       {progressByExercise.size > 0 && (
         <div>
