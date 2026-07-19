@@ -66,11 +66,12 @@
  
  // ---- Data Hook ----
  type WidgetData =
+  | { type: 'muscleProgress'; items: Awaited<ReturnType<typeof getMuscleProgressData>> }
    | { type: 'weeklySummary'; totalWorkouts: number; totalSets: number; totalVolume: number; totalReps: number }
    | { type: 'weeklyVolume'; items: { day: string; volume: number; sets: number }[] }
    | { type: 'muscleVolume'; items: { muscleId: string; muscleName: string; volume: number; sets: number }[] }
    | { type: 'progressiveOverload'; items: { date: string; exerciseName: string; weight: number; reps: number; restTime: number }[] }
-   | { type: 'monthlyStats'; items: { date: string; volume: number; sets: number; exercises: number }[] };
+   | { type: 'muscleProgress'; items: any[] };
  
  function useWidgetData(widget: DashboardWidget, workouts: Workout[]): WidgetData | null {
    return useMemo(() => {

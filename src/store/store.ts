@@ -54,7 +54,10 @@ function createDefaultWidgets(): DashboardWidget[] {
     { id: uuidv4(), type: 'weeklySummary', visualization: 'card', title: '本周概览' },
     { id: uuidv4(), type: 'weeklyVolume', visualization: 'bar', title: '每周容量' },
     { id: uuidv4(), type: 'muscleVolume', visualization: 'bar', title: '部位容量' },
-    { id: uuidv4(), type: 'progressiveOverload', visualization: 'table', title: '渐进超负荷' },
+    { id: uuidv4(), type: 'progressiveOverload', visualization: 'table', title: '渐进超负荷'
+  ];
+    // Will be added: muscleProgress
+  ]; },
   ];
 }
 

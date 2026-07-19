@@ -269,6 +269,7 @@ export function getExercise1RMProgression(
 
   for (const workout of monthWorkouts) {
     for (const exLog of workout.exercises) {
+      if (!exLog.isProgressiveOverload) continue;
       const exercise = getExercise(exLog.exerciseId);
       const name = exercise?.name || exLog.exerciseId;
       let bestE1RM = 0;
@@ -297,3 +298,81 @@ export function getExercise1RMProgression(
     }))
     .sort((a, b) => a.exerciseName.localeCompare(b.exerciseName));
 }
+
+/** Aggregate progressive overload data grouped by muscle category */
+export function getMuscleProgressData(
+  workouts: Workout[],
+  date: Date
+): {
+  category: string;
+  muscleIds: string[];
+  exerciseNames: string[];
+  weekly: { weekStart: string; volume: number; e1rm: number; setCount: number }[];
+}[] {
+  const monthWorkouts = getWorkoutsInMonth(workouts, date);
+  const catNames: Record<string, string> = {
+    chest: '胸', shoulders: '肩', back: '背', legs: '腿', arms: '手臂', core: '核心', other: '其他'
+  };
+
+  // Collect all starred exercises with their muscle categories
+  const exByCat = new Map<string, {
+    exerciseNames: Set<string>;
+    muscleIds: Set<string>;
+    weekly: Map<string, { volume: number; e1rm: number; sets: number; count: number }>;
+  }>();
+
+  for (const workout of monthWorkouts) {
+    const wDate = parseISO(workout.date);
+    const weekStart = format(startOfWeek(wDate, { weekStartsOn: 1 }), 'MM/dd');
+
+    for (const exLog of workout.exercises) {
+      if (!exLog.isProgressiveOverload) continue;
+      const exercise = getExercise(exLog.exerciseId);
+      if (!exercise || exercise.targets.length === 0) continue;
+
+      const firstTarget = getMuscleTarget(exercise.targets[0]);
+      const cat = firstTarget?.category || 'other';
+      const catLabel = catNames[cat] || cat;
+
+      if (!exByCat.has(catLabel)) {
+        exByCat.set(catLabel, { exerciseNames: new Set(), muscleIds: new Set(), weekly: new Map() });
+      }
+      const entry = exByCat.get(catLabel)!;
+      entry.exerciseNames.add(exercise.name);
+      exercise.targets.forEach(t => entry.muscleIds.add(t));
+
+      const vol = exerciseVolume(exLog);
+      let bestE1RM = 0;
+      let setCount = exLog.sets.length;
+      for (const s of exLog.sets) {
+        const e = estimate1RM(s.weight, s.reps);
+        if (e > bestE1RM) bestE1RM = e;
+      }
+
+      if (!entry.weekly.has(weekStart)) {
+        entry.weekly.set(weekStart, { volume: 0, e1rm: 0, sets: 0, count: 0 });
+      }
+      const w = entry.weekly.get(weekStart)!;
+      w.volume += vol;
+      w.e1rm = Math.max(w.e1rm, bestE1RM);
+      w.sets += setCount;
+      w.count += 1;
+    }
+  }
+
+  return Array.from(exByCat.entries())
+    .map(([category, data]) => ({
+      category,
+      muscleIds: Array.from(data.muscleIds),
+      exerciseNames: Array.from(data.exerciseNames),
+      weekly: Array.from(data.weekly.entries())
+        .map(([weekStart, stats]) => ({
+          weekStart,
+          volume: stats.volume,
+          e1rm: stats.e1rm,
+          setCount: stats.sets,
+        }))
+        .sort((a, b) => a.weekStart.localeCompare(b.weekStart)),
+    }));
+}
+
