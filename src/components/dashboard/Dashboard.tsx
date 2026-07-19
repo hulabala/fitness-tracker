@@ -17,16 +17,16 @@ const widgetSize: Record<string, { cols: number; height: number; label: string }
   muscleVolume: { cols: 1, height: 300, label: '大' },
 };
 
+const availableTypes: WidgetType[] = [
+  'weeklySummary',
+  'weeklyVolume',
+  'muscleVolume',
+];
+
 export default function Dashboard() {
   const { workouts, dashboardWidgets, addDashboardWidget, removeDashboardWidget, updateWidgetVisualization, updateWidgetType } =
     useFitnessStore();
   const [showAddMenu, setShowAddMenu] = useState(false);
-
-  const availableTypes: WidgetType[] = [
-    'weeklySummary',
-    'weeklyVolume',
-    'muscleVolume',
-  ];
 
   // Guard: if no widgets, show empty state
   if (dashboardWidgets.length === 0) {
